@@ -75,7 +75,7 @@ pyflakes==3.1.0
     # via flake8
 pyproject-hooks==1.0.0
     # via build
-pytest==7.4.0
+pytest==7.4.2
     # via
     #   datahub (pyproject.toml)
     #   pytest-cov
