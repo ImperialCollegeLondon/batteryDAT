@@ -1,4 +1,4 @@
-"""Unit tests for MyProject."""
+"""Unit tests for batteryDAT."""
 
 from logging import getLogger
 

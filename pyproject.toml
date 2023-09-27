@@ -6,14 +6,17 @@ build-backend = "setuptools.build_meta"
 exclude = ["htmlcov"] # Exclude the coverage report file from setuptools package finder
 
 [project]
-name = "datahub"
+name = "batteryDAT"
 version = "0.0.1"
 authors = [
-    { name = "Jane Doe", email = "jane_doe@some_email.com" },
-    { name = "Imperial College London RSE Team", email = "ict-rse-team@imperial.ac.uk" }
+    { name = "Niall Kirkaldy", email = "n.kirkaldy@yahoo.com" }
 ]
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy"
+]
 
 [project.optional-dependencies]
 dev = [
@@ -46,4 +49,4 @@ disallow_untyped_defs = false
 profile = "black"
 
 [tool.pytest.ini_options]
-addopts = "-v --mypy -p no:warnings --cov=myproject --cov-report=html --doctest-modules --ignore=myproject/__main__.py"
+addopts = "-v --mypy -p no:warnings --cov=batteryDAT --cov-report=html --doctest-modules --ignore=batteryDAT/__main__.py"
