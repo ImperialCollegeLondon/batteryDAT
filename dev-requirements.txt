@@ -104,7 +104,7 @@ typing-extensions==4.7.1
     # via
     #   filelock
     #   mypy
-virtualenv==20.24.4
+virtualenv==20.24.5
     # via pre-commit
 wheel==0.41.2
     # via pip-tools
