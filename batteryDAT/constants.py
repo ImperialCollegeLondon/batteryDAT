@@ -1,0 +1,20 @@
+# -*- coding: utf-8 -*-
+"""Constants used in the various other modules to be imported as needed."""
+
+# Define some variables to be used.
+TIME = "Time (s)"
+VOLTAGE = "Voltage (V)"
+CURRENT = "Current (mA)"
+NET_CHARGE = "Net charge (mA.h)"
+TEMPERATURE = "Temperature (degC)"
+DIS_CHARGE = "Discharge (mA.h)"
+SOC = "SOC (%)"
+OHM_RESISTANCE = "R0 (Ohms)"
+NS = "Ns changes"
+HALF_CYCLE = "half cycle"
+OCV = "OCV (V)"
+DYN_RESISTANCE = "Reff-R0 (Ohms)"
+TOTAL_RESISTANCE = "Reff (Ohms)"
+OVER_VOLTAGE = "Over-Voltage (V)"
+DIFF_RESISTANCE = "dR/dSOC (Ohms/%)"
+DIFF_CAPACITY = "dSOC/dV (%/V)"
