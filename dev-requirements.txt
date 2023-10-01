@@ -120,7 +120,7 @@ tomli==2.0.1
     #   pip-tools
     #   pyproject-hooks
     #   pytest
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via
     #   black
     #   mypy
