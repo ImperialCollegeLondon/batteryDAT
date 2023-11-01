@@ -9,7 +9,7 @@ numpy==1.26.0
     #   batteryDAT (pyproject.toml)
     #   pandas
     #   scipy
-pandas==2.1.1
+pandas==2.1.2
     # via batteryDAT (pyproject.toml)
 python-dateutil==2.8.2
     # via pandas
