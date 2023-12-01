@@ -4,7 +4,7 @@
 #
 #    pip-compile
 #
-numpy==1.26.0
+numpy==1.26.2
     # via
     #   batteryDAT (pyproject.toml)
     #   pandas
