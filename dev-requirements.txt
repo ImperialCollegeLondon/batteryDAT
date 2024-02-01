@@ -67,7 +67,7 @@ packaging==23.2
     #   pytest
 pandas==2.1.4
     # via batteryDAT (pyproject.toml)
-pathspec==0.11.2
+pathspec==0.12.1
     # via black
 pip-tools==7.3.0
     # via batteryDAT (pyproject.toml)
