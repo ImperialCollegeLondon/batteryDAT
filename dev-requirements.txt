@@ -126,7 +126,7 @@ typing-extensions==4.8.0
     #   mypy
 tzdata==2023.4
     # via pandas
-virtualenv==20.25.0
+virtualenv==20.25.1
     # via pre-commit
 wheel==0.41.2
     # via pip-tools
