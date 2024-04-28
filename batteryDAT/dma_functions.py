@@ -4,8 +4,9 @@
 
 import numpy as np
 import pandas as pd
-from constants import CURRENT, DIS_CHARGE, OCV, SOC, VOLTAGE
 from scipy import optimize
+
+from batteryDAT.constants import CURRENT, DIS_CHARGE, OCV, SOC, VOLTAGE
 
 # --------- electrode-level calculations ---------
 

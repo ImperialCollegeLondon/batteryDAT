@@ -4,7 +4,6 @@ Work in progress.
 
 ## Using batteryDAT
 
-
 ## Installing batteryDAT
 
 ## Citing batteryDAT

@@ -10,7 +10,16 @@ files) into pandas dataframe objects.
 
 import numpy as np
 import pandas as pd
-from constants import CURRENT, DIS_CHARGE, NET_CHARGE, NS, TEMPERATURE, TIME, VOLTAGE
+
+from batteryDAT.constants import (
+    CURRENT,
+    DIS_CHARGE,
+    NET_CHARGE,
+    NS,
+    TEMPERATURE,
+    TIME,
+    VOLTAGE,
+)
 
 names_dictionary = {
     "time/s": TIME,
