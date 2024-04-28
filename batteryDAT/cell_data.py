@@ -1,6 +1,6 @@
 # mypy: ignore-errors
 # -*- coding: utf-8 -*-
-"""Battery_data module for defining the BatteryCell class and its methods."""
+"""cell_data module for defining the BatteryCell class and its methods."""
 
 import analysis_functions as af
 import dma_functions as dma
@@ -315,7 +315,7 @@ class BatteryCell:
         return battery_data
 
     def add_data(self, filename, **kwargs):
-        """Add additional data to the raw_data dicitonary.
+        """Add additional data to the raw_data dictionary.
 
         add_data acts in a similar way as the load_data method, but without
         creating a new BatteryCell object and without the option of assigning
