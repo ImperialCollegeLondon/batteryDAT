@@ -9,4 +9,5 @@ required-plugins =
 docstring-convention = google
 per-file-ignores =
     # Uncomment to disable enforcing module-level docstring in tests/
-     tests/*:D100,D104
+     tests/*:D100,D104,
+	 __init__.py:F401
