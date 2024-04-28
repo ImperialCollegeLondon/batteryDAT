@@ -13,7 +13,8 @@ Contains various functions for analysing battery data, including:
 
 import numpy as np
 import pandas as pd
-from constants import (
+
+from batteryDAT.constants import (
     CURRENT,
     DIFF_CAPACITY,
     DIFF_RESISTANCE,

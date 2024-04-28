@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 """cell_data module for defining the BatteryCell class and its methods."""
 
-import analysis_functions as af
-import dma_functions as dma
 import pandas as pd
-import parsers
-from constants import CURRENT, DIS_CHARGE, OHM_RESISTANCE, SOC, TIME, VOLTAGE
+
+import batteryDAT.analysis_functions as af
+import batteryDAT.dma_functions as dma
+import batteryDAT.parsers as parsers
+from batteryDAT.constants import CURRENT, DIS_CHARGE, OHM_RESISTANCE, SOC, TIME, VOLTAGE
 
 
 class BatteryCell:
