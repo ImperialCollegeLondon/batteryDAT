@@ -621,7 +621,9 @@ def DM_calc_multi_comp(neg_el_comp1, neg_el_comp2, pos_el, BoL_cell, aged_cells)
     return DM_df, sto_param_df
 
 
-def DM_error_check(NE_comp1_data, NE_comp2_data, PE_data, cell_data, fit_results):
+def DM_error_check_multi_comp(
+    NE_comp1_data, NE_comp2_data, PE_data, cell_data, fit_results
+):
     """Check RMSE of fitted pOCV curve against measured one."""
     cell_calc_data, _, _, _ = simulate_composite_OCV(
         NE_comp1_data, NE_comp2_data, PE_data, cell_data[SOC], *fit_results
@@ -658,7 +660,9 @@ def DM_calc_multi_comp_long(
     )
 
     # Calculate error of the fit
-    err_BoL = DM_error_check(neg_el_comp1, neg_el_comp2, pos_el, BoL_cell_data, z_BoL)
+    err_BoL = DM_error_check_multi_comp(
+        neg_el_comp1, neg_el_comp2, pos_el, BoL_cell_data, z_BoL
+    )
 
     # Make a list of z_values and cell_parameters and populate with BoL data
     z_list = [z_BoL]
@@ -691,7 +695,7 @@ def DM_calc_multi_comp_long(
         )
 
         # Calculate error of fit (RMSE of fitted curve minus actual data)
-        err_EoL = DM_error_check(
+        err_EoL = DM_error_check_multi_comp(
             neg_el_comp1, neg_el_comp2, pos_el, aged_cell_data, z_EoL
         )
 
@@ -710,7 +714,7 @@ def DM_calc_multi_comp_long(
                 diff_step_size=0.1,
             )
             # Calculate error of fit (RMSE of fitted curve minus actual data)
-            err_EoL = DM_error_check(
+            err_EoL = DM_error_check_multi_comp(
                 neg_el_comp1, neg_el_comp2, pos_el, aged_cell_data, z_EoL
             )
 
@@ -892,3 +896,131 @@ def simulate_OCV(
     cell_out.reset_index(inplace=True)
 
     return cell_out, ne_data_int, pe_data_int
+
+
+def DM_error_check(NE_data, PE_data, cell_data, fit_results):
+    """Check RMSE of fitted pOCV curve against measured one."""
+    cell_calc_data, _, _, _ = simulate_OCV(
+        NE_data, PE_data, cell_data[SOC], *fit_results
+    )
+
+    if len(cell_calc_data["OCV"]) == len(cell_data[VOLTAGE]):
+        diff = pd.DataFrame(data=cell_data[SOC])
+        diff["V error"] = cell_data[VOLTAGE] - cell_calc_data["OCV"]
+        err_array = np.array(diff["V error"])
+        rmse_result = np.sqrt(np.square(err_array).mean())
+    else:
+        rmse_result = 10e5
+
+    return rmse_result
+
+
+def DM_calc_long(neg_el, pos_el, BoL_cell, aged_cells, carry_guess=True):
+    """Degradation mode analysis for a cell at multiple SoH's."""
+    # Format the BoL full cell data
+    BoL_cell_data = BoL_cell[BoL_cell[CURRENT] < 0].loc[:, [DIS_CHARGE, VOLTAGE]]
+    BoL_cell_data.reset_index(inplace=True, drop=True)
+    BoL_cell_data[SOC] = 1 - (
+        BoL_cell_data[DIS_CHARGE] / BoL_cell_data[DIS_CHARGE].max()
+    )
+
+    # Perform the optimisation fit for the BoL data
+    z_BoL, z_BoL_cov, BoL_params = stoich_OCV_fit(
+        anode_data=neg_el,
+        cathode_data=pos_el,
+        full_cell=BoL_cell_data,
+    )
+
+    # Calculate error of the fit
+    err_BoL = DM_error_check(neg_el, pos_el, BoL_cell_data, z_BoL)
+
+    # Make a list of z_values and cell_parameters and populate with BoL data
+    z_list = [z_BoL]
+    param_list = [BoL_params]
+    # cov_matrix = [np.sqrt(np.diag(z_BoL_cov))]
+    err_list = [err_BoL]
+
+    counter_val = 0
+
+    for aged_data in aged_cells:
+        # Format the aged full cell data
+        aged_cell_data = aged_data[aged_data[CURRENT] < 0].loc[:, [DIS_CHARGE, VOLTAGE]]
+        aged_cell_data.reset_index(inplace=True, drop=True)
+        aged_cell_data[SOC] = 1 - (
+            aged_cell_data[DIS_CHARGE] / aged_cell_data[DIS_CHARGE].max()
+        )
+
+        if not carry_guess:
+            guess_values = [0.1, 0.002, 0.95, 0.85]
+        else:
+            guess_values = z_list[counter_val]
+
+        # Perform the optimisation fit for the aged full cell data
+        z_EoL, z_EoL_cov, aged_params = stoich_OCV_fit(
+            anode_data=neg_el,
+            cathode_data=pos_el,
+            full_cell=aged_cell_data,
+            z_guess=guess_values,
+        )
+
+        # Calculate error of fit (RMSE of fitted curve minus actual data)
+        err_EoL = DM_error_check(neg_el, pos_el, aged_cell_data, z_EoL)
+
+        iter_val = 0
+        while (
+            aged_params[3] > param_list[counter_val][3]  # Check this.
+            or aged_params[2] > param_list[counter_val][2]
+        ) and iter_val < 10:
+            iter_val += 1
+            z_EoL, z_EoL_cov, aged_params = stoich_OCV_fit(
+                anode_data=neg_el,
+                cathode_data=pos_el,
+                full_cell=aged_cell_data,
+                z_guess=z_list[counter_val],
+                diff_step_size=0.1,
+            )
+            # Calculate error of fit (RMSE of fitted curve minus actual data)
+            err_EoL = DM_error_check(neg_el, pos_el, aged_cell_data, z_EoL)
+
+        z_list.append(z_EoL)
+        param_list.append(aged_params)
+        # cov_matrix.append(np.sqrt(np.diag(z_EoL_cov)))
+        err_list.append(err_EoL)
+        counter_val += 1
+
+    # Make dataframes using the lists complied above
+    z_parameter_df = pd.DataFrame(
+        data=z_list, columns=["PE_lo", "NE_lo", "PE_hi", "NE_hi"]
+    )
+    sto_param_df = pd.DataFrame(
+        data=param_list,
+        columns=[
+            "Cell Capacity",
+            "PE Capacity",
+            "NE Capacity",
+            "Offset",
+        ],
+    )
+    err_df = pd.DataFrame(data={"RMSE (V)": err_list})
+
+    # Calculate DM parameters from the stoic_parameter dataframe above
+    SoH = sto_param_df["Cell Capacity"] / sto_param_df["Cell Capacity"][0]
+    LAM_pe = 1 - (sto_param_df["PE Capacity"] / sto_param_df["PE Capacity"][0])
+    LAM_ne = 1 - (sto_param_df["NE Capacity"] / sto_param_df["NE Capacity"][0])
+    LLI = (
+        sto_param_df["PE Capacity"][0]
+        - sto_param_df["PE Capacity"]
+        - (sto_param_df["Offset"][0] - sto_param_df["Offset"])
+    ) / sto_param_df["Cell Capacity"][0]
+
+    # Compile the DM parameters into a dataframe
+    DM_df = pd.DataFrame(
+        data={
+            "SoH": SoH,
+            "LAM PE": LAM_pe,
+            "LAM NE_tot": LAM_ne,
+            "LLI": LLI,
+        }
+    )
+
+    return DM_df, sto_param_df, err_df, z_parameter_df
