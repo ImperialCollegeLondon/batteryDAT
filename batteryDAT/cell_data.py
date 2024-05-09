@@ -827,14 +827,12 @@ class BatteryCell:
 
         # If NE is not a composite, format NE data then do 'normal' OCV-fit.
         if not composite:
-            print("Only composite DMA currently supported. See old version.")
-            return
             NE_data = dma.check_electrode_data(negative_electrode, "negative electrode")
             if not isinstance(NE_data, pd.core.frame.DataFrame):
                 print("Error: try again with different NE data.")
                 return
             # UPDATE WITH NON-COMPOSITE VERSION
-            DMs, caps, _, _ = dma.DM_calc_multi_comp_long(
+            DMs, caps, _, _ = dma.DM_calc_long(
                 NE_data,
                 PE_data,
                 self.raw_data[data_name][0],
