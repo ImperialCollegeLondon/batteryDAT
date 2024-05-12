@@ -86,7 +86,7 @@ class BatteryCell:
 
     def __str__(self):
         """Informal string representation."""
-        return_string = "Battery Type:\n"
+        return_string = "BatteryCell:\n"
         for key, value in self.__dict__.items():
             return_string += f"{key}: {value}\n"
         return return_string
@@ -844,7 +844,6 @@ class BatteryCell:
             if not isinstance(NE_data, pd.core.frame.DataFrame):
                 print("Error: try again with different NE data.")
                 return
-            # UPDATE WITH NON-COMPOSITE VERSION
             DMs, caps, _, _ = dma.DM_calc_long(
                 NE_data,
                 PE_data,
@@ -863,7 +862,7 @@ class BatteryCell:
                 print("Error: try again with different NE comp. 2 data.")
                 return
 
-            DMs, caps, _, _ = dma.DM_calc_multi_comp_long(
+            DMs, caps, err, stoich = dma.DM_calc_multi_comp_long(
                 NE_data_1,
                 NE_data_2,
                 PE_data,
@@ -871,7 +870,7 @@ class BatteryCell:
                 self.raw_data[data_name][1:],
                 carry_guess=carry_guess,
             )
-        self.processed_data["DMA"] = DMs, caps
+        self.processed_data["DMA"] = DMs, caps, stoich, err
 
     def OCV_sim(
         self,

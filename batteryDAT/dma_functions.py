@@ -19,43 +19,43 @@ def composite_fit(
     composite_el_data_edit = composite_el_data.copy()
 
     c1_data = component1_data.copy()
-    c1_data["OCV"] = c1_data["OCV"].round(4)
+    c1_data[OCV] = c1_data[OCV].round(4)
     c1_data.drop_duplicates(
-        subset=["OCV"], inplace=True
+        subset=[OCV], inplace=True
     )  # Duplicates cause issues when part of an index
-    c1_data.set_index("OCV", inplace=True)
+    c1_data.set_index(OCV, inplace=True)
     c2_data = component2_data.copy()
-    c2_data["OCV"] = c2_data["OCV"].round(4)
-    c2_data.drop_duplicates(subset=["OCV"], inplace=True)
-    c2_data.set_index("OCV", inplace=True)
+    c2_data[OCV] = c2_data[OCV].round(4)
+    c2_data.drop_duplicates(subset=[OCV], inplace=True)
+    c2_data.set_index(OCV, inplace=True)
 
     # Find the upper and lower voltage values used in the data fit.
     # Determined by the dataset with the lowest/highest values, respectively.
     if (
-        composite_el_data_edit["OCV"].max() < component1_data["OCV"].max()
-        and composite_el_data_edit["OCV"].max() < component2_data["OCV"].max()
+        composite_el_data_edit[OCV].max() < component1_data[OCV].max()
+        and composite_el_data_edit[OCV].max() < component2_data[OCV].max()
     ):
-        V_upper = composite_el_data_edit["OCV"].max()
+        V_upper = composite_el_data_edit[OCV].max()
     elif (
-        component1_data["OCV"].max() < composite_el_data_edit["OCV"].max()
-        and component1_data["OCV"].max() < component2_data["OCV"].max()
+        component1_data[OCV].max() < composite_el_data_edit[OCV].max()
+        and component1_data[OCV].max() < component2_data[OCV].max()
     ):
-        V_upper = component1_data["OCV"].max()
+        V_upper = component1_data[OCV].max()
     else:
-        V_upper = component2_data["OCV"].max()
+        V_upper = component2_data[OCV].max()
 
     if (
-        composite_el_data_edit["OCV"].min() > component1_data["OCV"].min()
-        and composite_el_data_edit["OCV"].min() > component2_data["OCV"].min()
+        composite_el_data_edit[OCV].min() > component1_data[OCV].min()
+        and composite_el_data_edit[OCV].min() > component2_data[OCV].min()
     ):
-        V_lower = composite_el_data_edit["OCV"].min()
+        V_lower = composite_el_data_edit[OCV].min()
     elif (
-        component1_data["OCV"].min() > composite_el_data_edit["OCV"].min()
-        and component1_data["OCV"].min() > component2_data["OCV"].min()
+        component1_data[OCV].min() > composite_el_data_edit[OCV].min()
+        and component1_data[OCV].min() > component2_data[OCV].min()
     ):
-        V_lower = component1_data["OCV"].min()
+        V_lower = component1_data[OCV].min()
     else:
-        V_lower = component2_data["OCV"].min()
+        V_lower = component2_data[OCV].min()
 
     # Set the voltage range used in the fitting.
     V_range = np.linspace(V_lower, V_upper, 10001)
@@ -63,11 +63,11 @@ def composite_fit(
     # V and SOC data from full_cell dataset need to be numpy arrays for fit.
     composite_el_data_edit = composite_el_data_edit[
         (
-            (composite_el_data_edit["OCV"] < V_upper)
-            & (composite_el_data_edit["OCV"] > V_lower)
+            (composite_el_data_edit[OCV] < V_upper)
+            & (composite_el_data_edit[OCV] > V_lower)
         )
     ]
-    el_V = np.array(composite_el_data_edit["OCV"])
+    el_V = np.array(composite_el_data_edit[OCV])
     el_cap = np.array(composite_el_data_edit["z"])
 
     # Define the function which calculates a composite V vs Q curve based on
@@ -77,33 +77,31 @@ def composite_fit(
         cap_comp2 = 1.0 - cap_comp1
 
         # make new dataframes for the interpolation (component1 here)
-        c1_data_int = pd.DataFrame(data=V_range, columns=["OCV"])
+        c1_data_int = pd.DataFrame(data=V_range, columns=[OCV])
         # new DF with linearly spaced 'OCV' vals between V limits specified.
-        c1_data_int["OCV"] = c1_data_int["OCV"].round(4)  # Remove rounding err
-        c1_data_int.drop_duplicates(
-            subset=["OCV"], inplace=True
-        )  # Get rid of duplicates
+        c1_data_int[OCV] = c1_data_int[OCV].round(4)  # Remove rounding err
+        c1_data_int.drop_duplicates(subset=[OCV], inplace=True)  # Get rid of duplicates
         c1_data_int.set_index(
-            "OCV", inplace=True
+            OCV, inplace=True
         )  # Make 'OCV' the index for matching 'z' against
         c1_data_int["z"] = c1_data["z"] * cap_comp1
         c1_data_int.interpolate(inplace=True)
 
         # same for component2
         c2_data_int = pd.DataFrame(
-            data=V_range, columns=["OCV"]
+            data=V_range, columns=[OCV]
         )  # Exactly the same as above, but for component2
-        c2_data_int["OCV"] = c2_data_int["OCV"].round(4)
-        c2_data_int.drop_duplicates(subset=["OCV"], inplace=True)
-        c2_data_int.set_index("OCV", inplace=True)
+        c2_data_int[OCV] = c2_data_int[OCV].round(4)
+        c2_data_int.drop_duplicates(subset=[OCV], inplace=True)
+        c2_data_int.set_index(OCV, inplace=True)
         c2_data_int["z"] = c2_data["z"] * cap_comp2
         c2_data_int.interpolate(inplace=True)
 
         # calculate the composite electrode 'z' values from the two components
-        cell_cap = pd.DataFrame(data=V_range, columns=["OCV"])
-        cell_cap["OCV"] = cell_cap["OCV"].round(4)  # Get rid of rounding err
-        cell_cap.drop_duplicates(subset=["OCV"], inplace=True)
-        cell_cap.set_index("OCV", inplace=True)
+        cell_cap = pd.DataFrame(data=V_range, columns=[OCV])
+        cell_cap[OCV] = cell_cap[OCV].round(4)  # Get rid of rounding err
+        cell_cap.drop_duplicates(subset=[OCV], inplace=True)
+        cell_cap.set_index(OCV, inplace=True)
         cell_cap["z"] = c1_data_int["z"] + c2_data_int["z"]
         cell_cap["z"] = cell_cap["z"].round(4)
         cell_cap.reset_index(inplace=True)
@@ -116,12 +114,12 @@ def composite_fit(
         # input (measured) composite electrode data in terms of 'z' (so that
         # they have the same number of datapoints for the optimisation).
         cell_out = pd.DataFrame(data=None, index=z_points.round(4))
-        cell_out["OCV"] = cell_cap["OCV"]
+        cell_out[OCV] = cell_cap[OCV]
         cell_out.interpolate(inplace=True)
         cell_out.reset_index(inplace=True)  # (not necessary - delete?)
 
         # Needs to be numpy array for optimisation function.
-        output = np.array(cell_out["OCV"])
+        output = np.array(cell_out[OCV])
 
         print(cap_comp1, cap_comp2)
 
@@ -153,19 +151,19 @@ def el_fit_error_check(NE_comp1_data, NE_comp2_data, electrode_data, fit_results
         NE_comp1_data, NE_comp2_data, el_data, *fit_results
     )
 
-    el_data["OCV"] = el_data["OCV"].round(4)
-    el_calc_data["OCV"] = el_calc_data["OCV"].round(4)
+    el_data[OCV] = el_data[OCV].round(4)
+    el_calc_data[OCV] = el_calc_data[OCV].round(4)
     print(el_calc_data.head())
 
-    el_calc_data.drop_duplicates(subset=["OCV"], inplace=True)
-    el_data.drop_duplicates(subset=["OCV"], inplace=True)
+    el_calc_data.drop_duplicates(subset=[OCV], inplace=True)
+    el_data.drop_duplicates(subset=[OCV], inplace=True)
 
-    if len(el_calc_data["OCV"]) < len(el_data["OCV"]):
+    if len(el_calc_data[OCV]) < len(el_data[OCV]):
         short_data = el_calc_data
-        diff = pd.DataFrame(data=short_data["OCV"])
-        diff.set_index("OCV", inplace=True)
-        el_data.set_index("OCV", inplace=True)
-        el_calc_data.set_index("OCV", inplace=True)
+        diff = pd.DataFrame(data=short_data[OCV])
+        diff.set_index(OCV, inplace=True)
+        el_data.set_index(OCV, inplace=True)
+        el_calc_data.set_index(OCV, inplace=True)
 
         diff["z error"] = el_data["z"] - el_calc_data["z"]
 
@@ -201,7 +199,7 @@ def el_fit_error_check_V(NE_comp1_data, NE_comp2_data, electrode_data, fit_resul
         el_data.set_index("z", inplace=True)
         el_calc_data.set_index("z", inplace=True)
 
-        diff["V error"] = el_data["OCV"] - el_calc_data["OCV"]
+        diff["V error"] = el_data[OCV] - el_calc_data[OCV]
 
         err_array = np.array(diff["V error"])
         rmse_result = np.sqrt(np.square(err_array).mean())
@@ -232,31 +230,31 @@ def format_el_component_data(component1_data, component2_data):
     # over the full voltage range.
     # Also, use those limits to make a linearly-spaced voltage series between
     # those limits called 'V_ranges'
-    if component1_data["OCV"].max() < component2_data["OCV"].max():
-        V_upper = component2_data["OCV"].max()
-        c1_data.loc[0, "OCV"] = V_upper
+    if component1_data[OCV].max() < component2_data[OCV].max():
+        V_upper = component2_data[OCV].max()
+        c1_data.loc[0, OCV] = V_upper
     else:
-        V_upper = component1_data["OCV"].max()
-        c2_data.loc[0, "OCV"] = V_upper
+        V_upper = component1_data[OCV].max()
+        c2_data.loc[0, OCV] = V_upper
 
-    if component1_data["OCV"].min() > component2_data["OCV"].min():
-        V_lower = component2_data["OCV"].min()
-        c1_data.loc[c1_data.index.max(), "OCV"] = V_lower
+    if component1_data[OCV].min() > component2_data[OCV].min():
+        V_lower = component2_data[OCV].min()
+        c1_data.loc[c1_data.index.max(), OCV] = V_lower
     else:
-        V_lower = component1_data["OCV"].min()
-        c2_data.loc[c2_data.index.max(), "OCV"] = V_lower
+        V_lower = component1_data[OCV].min()
+        c2_data.loc[c2_data.index.max(), OCV] = V_lower
 
     V_ranges = np.unique(np.linspace(V_lower, V_upper, 10001).round(decimals=4))
 
-    c1_data["OCV"] = c1_data["OCV"].round(4)
+    c1_data[OCV] = c1_data[OCV].round(4)
     c1_data.drop_duplicates(
-        subset=["OCV"], inplace=True
+        subset=[OCV], inplace=True
     )  # Duplicates cause issues when part of an index
-    c1_data.set_index("OCV", inplace=True)
+    c1_data.set_index(OCV, inplace=True)
 
-    c2_data["OCV"] = c2_data["OCV"].round(4)
-    c2_data.drop_duplicates(subset=["OCV"], inplace=True)
-    c2_data.set_index("OCV", inplace=True)
+    c2_data[OCV] = c2_data[OCV].round(4)
+    c2_data.drop_duplicates(subset=[OCV], inplace=True)
+    c2_data.set_index(OCV, inplace=True)
 
     return c1_data, c2_data, V_ranges
 
@@ -495,27 +493,27 @@ def simulate_composite_OCV(
     # make new dataframes for the interpolation
     ne_data_int = pd.DataFrame(data=z_ne, columns=["z"])
     ne_data_int.set_index("z", inplace=True)
-    ne_data_int["OCV"] = ne_data["OCV"]
+    ne_data_int[OCV] = ne_data[OCV]
     ne_data_int.interpolate(inplace=True)
     ne_data_int.reset_index(inplace=True)
 
     # same for pos electrode
     pe_data_int = pd.DataFrame(data=z_pe, columns=["z"])
     pe_data_int.set_index("z", inplace=True)
-    pe_data_int["OCV"] = pe_data["OCV"]
+    pe_data_int[OCV] = pe_data[OCV]
     pe_data_int.interpolate(inplace=True)
     pe_data_int.reset_index(inplace=True)
 
     # calculate full cell ocv from 1/2 cell datasets
     cell_ocv = pd.DataFrame(data=None)
-    cell_ocv["OCV"] = pe_data_int["OCV"] - ne_data_int["OCV"]
-    cell_ocv[SOC] = np.linspace(0, 1, len(cell_ocv["OCV"]))
+    cell_ocv[OCV] = pe_data_int[OCV] - ne_data_int[OCV]
+    cell_ocv[SOC] = np.linspace(0, 1, len(cell_ocv[OCV]))
     cell_ocv.set_index(SOC, inplace=True)
 
     # match calculated full cell data with input (measured) full cell data
     # in terms of SOC (for same number of datapoints for the optimisation)
     cell_out = pd.DataFrame(data=None, index=SOC_points.round(5))
-    cell_out["OCV"] = cell_ocv["OCV"]
+    cell_out[OCV] = cell_ocv[OCV]
     cell_out.interpolate(inplace=True)
     cell_out.reset_index(inplace=True)
 
@@ -629,9 +627,9 @@ def DM_error_check_multi_comp(
         NE_comp1_data, NE_comp2_data, PE_data, cell_data[SOC], *fit_results
     )
 
-    if len(cell_calc_data["OCV"]) == len(cell_data[VOLTAGE]):
+    if len(cell_calc_data[OCV]) == len(cell_data[VOLTAGE]):
         diff = pd.DataFrame(data=cell_data[SOC])
-        diff["V error"] = cell_data[VOLTAGE] - cell_calc_data["OCV"]
+        diff["V error"] = cell_data[VOLTAGE] - cell_calc_data[OCV]
         err_array = np.array(diff["V error"])
         rmse_result = np.sqrt(np.square(err_array).mean())
     else:
@@ -778,7 +776,7 @@ def stoich_OCV_fit(
     anode_data, cathode_data, full_cell, z_guess=None, diff_step_size=None
 ):
     """Determine electrode-level SoCs from cell-level pOCV data."""
-    if not z_guess:
+    if not isinstance(z_guess, (np.ndarray, list)):
         z_guess = [0.1, 0.002, 0.95, 0.85]
     if not diff_step_size:
         diff_step_size = 0.01
@@ -900,13 +898,11 @@ def simulate_OCV(
 
 def DM_error_check(NE_data, PE_data, cell_data, fit_results):
     """Check RMSE of fitted pOCV curve against measured one."""
-    cell_calc_data, _, _, _ = simulate_OCV(
-        NE_data, PE_data, cell_data[SOC], *fit_results
-    )
+    cell_calc_data, _, _ = simulate_OCV(NE_data, PE_data, cell_data[SOC], *fit_results)
 
-    if len(cell_calc_data["OCV"]) == len(cell_data[VOLTAGE]):
+    if len(cell_calc_data[OCV]) == len(cell_data[VOLTAGE]):
         diff = pd.DataFrame(data=cell_data[SOC])
-        diff["V error"] = cell_data[VOLTAGE] - cell_calc_data["OCV"]
+        diff["V error"] = cell_data[VOLTAGE] - cell_calc_data[OCV]
         err_array = np.array(diff["V error"])
         rmse_result = np.sqrt(np.square(err_array).mean())
     else:
@@ -966,22 +962,6 @@ def DM_calc_long(neg_el, pos_el, BoL_cell, aged_cells, carry_guess=True):
         # Calculate error of fit (RMSE of fitted curve minus actual data)
         err_EoL = DM_error_check(neg_el, pos_el, aged_cell_data, z_EoL)
 
-        iter_val = 0
-        while (
-            aged_params[3] > param_list[counter_val][3]  # Check this.
-            or aged_params[2] > param_list[counter_val][2]
-        ) and iter_val < 10:
-            iter_val += 1
-            z_EoL, z_EoL_cov, aged_params = stoich_OCV_fit(
-                anode_data=neg_el,
-                cathode_data=pos_el,
-                full_cell=aged_cell_data,
-                z_guess=z_list[counter_val],
-                diff_step_size=0.1,
-            )
-            # Calculate error of fit (RMSE of fitted curve minus actual data)
-            err_EoL = DM_error_check(neg_el, pos_el, aged_cell_data, z_EoL)
-
         z_list.append(z_EoL)
         param_list.append(aged_params)
         # cov_matrix.append(np.sqrt(np.diag(z_EoL_cov)))
@@ -1018,7 +998,7 @@ def DM_calc_long(neg_el, pos_el, BoL_cell, aged_cells, carry_guess=True):
         data={
             "SoH": SoH,
             "LAM PE": LAM_pe,
-            "LAM NE_tot": LAM_ne,
+            "LAM NE": LAM_ne,
             "LLI": LLI,
         }
     )
