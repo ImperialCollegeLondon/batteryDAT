@@ -60,7 +60,7 @@ numpy==1.26.2
     #   batteryDAT (pyproject.toml)
     #   pandas
     #   scipy
-packaging==23.2
+packaging==24.0
     # via
     #   black
     #   build
