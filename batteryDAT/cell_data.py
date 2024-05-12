@@ -423,6 +423,9 @@ class BatteryCell:
 
         """
         input_data = self.raw_data[data_name]
+        resistance_results = []
+        if not isinstance(input_data, list):
+            input_data = [input_data]
         if not battery_cycler:
             battery_cycler = self.battery_cycler
         if not battery_cycler:
@@ -434,12 +437,13 @@ class BatteryCell:
             )
         if battery_cycler.lower() in ["biologic", "bio-logic"]:
             if timestep:
-                self.processed_data[OHM_RESISTANCE] = af.resist_time(
-                    input_data, timestep
-                )
-
+                for dataset in input_data:
+                    resistance_results.append(af.resist_time(dataset, timestep))
             else:
-                self.processed_data[OHM_RESISTANCE] = af.r0_calc_dis(input_data)
+                for dataset in input_data:
+                    resistance_results.append(af.r0_calc_dis(dataset))
+            self.processed_data[OHM_RESISTANCE] = resistance_results
+
         elif battery_cycler.lower() in ["maccor"]:
             if timestep:
                 print(
@@ -448,9 +452,11 @@ class BatteryCell:
                 )
                 return None
             number_pulses = int(input("Number of current pulses in data:"))
-            self.processed_data[OHM_RESISTANCE] = af.r0_calc_dis_maccor(
-                input_data, number_pulses
-            )
+            for dataset in input_data:
+                resistance_results.append(
+                    af.r0_calc_dis_maccor(input_data, number_pulses)
+                )
+            self.processed_data[OHM_RESISTANCE] = resistance_results
         elif battery_cycler.lower() in ["basytec"]:
             if timestep:
                 print(
@@ -458,7 +464,9 @@ class BatteryCell:
                       biologic data currently."""
                 )
                 return None
-            self.processed_data[OHM_RESISTANCE] = af.r0_calc_dis_bastyec(input_data)
+            for dataset in input_data:
+                resistance_results.append(af.r0_calc_dis_bastyec(input_data))
+            self.processed_data[OHM_RESISTANCE] = resistance_results
         else:
             print(f"Unsupported battery cycler ({battery_cycler}).")
 
@@ -557,10 +565,15 @@ class BatteryCell:
         if data_name not in self.raw_data.keys():
             print("Cannot find data_name in raw_data dictionary.")
             return None
-
-        self.processed_data["ICA"] = af.dQdV(
-            self.raw_data[data_name], dV_range=dV_range, V_total=V_total, I_type=I_type
-        )
+        ICA_results = []
+        input_data = self.raw_data[data_name]
+        if not isinstance(input_data, list):
+            input_data = [input_data]
+        for dataset in input_data:
+            ICA_results.append(
+                af.dQdV(dataset, dV_range=dV_range, V_total=V_total, I_type=I_type)
+            )
+        self.processed_data["ICA"] = ICA_results
 
     def dRdQ(self, dQ_range=1, Q_total=100):
         """Calculate differential of dynamic resistance w.r.t. charge passed.
