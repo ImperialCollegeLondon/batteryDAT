@@ -3,6 +3,7 @@
 """cell_data module for defining the BatteryCell class and its methods."""
 
 import pandas as pd
+from numpy import ndarray
 
 import batteryDAT.analysis_functions as af
 import batteryDAT.dma_functions as dma
@@ -817,7 +818,7 @@ class BatteryCell:
         Returns
         -------
         None. Results are saved in self.processed_data['DMA'] in the
-        form of two pandas dataframe objects (DMs and capacities).
+        form of 4 pandas dataframe objects (DMs, capacities, fitting params, and RMSEs).
 
         """
         # Check full-cell data selected for OCV-fitting exists etc.
@@ -844,7 +845,7 @@ class BatteryCell:
             if not isinstance(NE_data, pd.core.frame.DataFrame):
                 print("Error: try again with different NE data.")
                 return
-            DMs, caps, _, _ = dma.DM_calc_long(
+            DMs, caps, err, stoich = dma.DM_calc_long(
                 NE_data,
                 PE_data,
                 self.raw_data[data_name][0],
@@ -942,7 +943,7 @@ class BatteryCell:
 
         """
         # Check if fitting parameters exist. Exit function if not.
-        if not fitting_parameters:
+        if not isinstance(fitting_parameters, (list, ndarray)):
             if "OCV-fit" not in self.processed_data.keys():
                 print(
                     """No OCV-fitting parameters found in processed_data.
