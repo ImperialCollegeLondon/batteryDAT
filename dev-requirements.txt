@@ -65,7 +65,7 @@ packaging==24.0
     #   black
     #   build
     #   pytest
-pandas==2.2.1
+pandas==2.2.2
     # via batteryDAT (pyproject.toml)
 pathspec==0.12.1
     # via black
