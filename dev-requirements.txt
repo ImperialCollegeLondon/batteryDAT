@@ -77,7 +77,7 @@ platformdirs==4.2.0
     #   virtualenv
 pluggy==1.4.0
     # via pytest
-pre-commit==3.3.3
+pre-commit==3.7.1
     # via batteryDAT (pyproject.toml)
 pycodestyle==2.11.1
     # via flake8
