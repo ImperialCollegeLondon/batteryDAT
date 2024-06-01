@@ -6,7 +6,7 @@
 #
 attrs==23.2.0
     # via pytest-mypy
-black==24.3.0
+black==24.4.2
     # via batteryDAT (pyproject.toml)
 build==1.2.1
     # via pip-tools
