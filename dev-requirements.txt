@@ -53,7 +53,7 @@ mypy-extensions==1.0.0
     # via
     #   black
     #   mypy
-nodeenv==1.8.0
+nodeenv==1.9.0
     # via pre-commit
 numpy==1.26.2
     # via
